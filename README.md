@@ -1,5 +1,7 @@
 # ToggleWebHelper
 
+Program that disables SteamWebHelper.exe so it uses less ram and uses less cpu cycles.
+
 Inspiration from https://github.com/Aetopia/NoSteamWebHelper
 
 Adds a system tray icon so you can disable and enable it within games to use to invite friends/receive steam invites instead of having it permanently disabled.
