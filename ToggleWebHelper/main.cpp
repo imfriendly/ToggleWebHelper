@@ -4,12 +4,13 @@
 #include <tchar.h>
 
 #define	WM_USER_SHELLICON WM_USER + 1
+#define WM_TASKBAR_CREATE RegisterWindowMessage(_T("TaskbarCreated"))
 
 NOTIFYICONDATA NID;
 
 HANDLE thread_handle = NULL;
 
-void suspend_main_thread() {
+static void suspend_main_thread() {
 	auto window = FindWindowW(L"vguiPopupWindow", L"Untitled");
 	if (window == NULL) {
 		return;
@@ -24,7 +25,7 @@ void suspend_main_thread() {
 	SuspendThread(thread_handle);
 }
 
-void resume_main_thread() {
+static void resume_main_thread() {
 	if (thread_handle == NULL) {
 		return;
 	}
@@ -34,7 +35,7 @@ void resume_main_thread() {
 	thread_handle = NULL;
 }
 
-void terminate_steamwebhelper() {
+static void terminate_steamwebhelper() {
 	PROCESSENTRY32 process_entry;
 	process_entry.dwSize = sizeof(PROCESSENTRY32);
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
@@ -54,6 +55,10 @@ void terminate_steamwebhelper() {
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	if (message == WM_TASKBAR_CREATE) {
+		Shell_NotifyIcon(NIM_ADD, &NID);
+	}
+
 	switch (message) {
 	case WM_USER_SHELLICON:
 		switch (LOWORD(lParam)) {
@@ -62,8 +67,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			POINT lpClickPoint;
 			GetCursorPos(&lpClickPoint);
 			HMENU hPopMenu = CreatePopupMenu();
-			AppendMenu(hPopMenu, MF_STRING, 1, L"Disable SteamWebHelper");
-			AppendMenu(hPopMenu, MF_STRING, 2, L"Enable SteamWebHelper");
+			AppendMenu(hPopMenu, MF_STRING, 1, L"Disable steamwebhelper");
+			AppendMenu(hPopMenu, MF_STRING, 2, L"Enable steamwebhelper");
 			AppendMenu(hPopMenu, MF_STRING, 3, L"Exit");
 			SetForegroundWindow(hWnd);
 			TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_LEFTBUTTON, lpClickPoint.x, lpClickPoint.y, 0, hWnd, NULL);
